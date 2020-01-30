@@ -1,0 +1,490 @@
+import flash.events.TouchEvent;
+import flash.events.Event;
+import fl.events.ComponentEvent; 
+import flash.utils.Timer;
+import flash.events.TimerEvent;
+ 
+stop();
+
+//Timer Variables
+var myTimer:Timer = new Timer(1000, 10);
+var count:Number = 30;
+
+myTimer.start();
+
+//LAP VARIABLES
+var lap = 0;
+var boolap:Boolean = false;
+
+var totallaps = 3;
+var fulllap:Boolean = false;
+var tens = 0;
+var seconds =0;
+var minutes = 0;
+
+//CAR VARIABLES
+var increment:Number = 0;	//amount the car moves each frame
+var carRotation:Number = carMC.rotation;	//rotation of the car
+var posNeg:Number = 1;
+var acceleration:Number = .05;	//acceleration of the car, or the amount increment gets increased by.
+var speed:Number = 0;	//the speed of the car that will be displayed on screen
+var maxSpeed:Number = 50;	//The max speed the car can travel
+var check2:Boolean = true;
+var check3:Boolean = true;
+
+//keyboard capture code start
+var keyLeftPressed:Boolean;
+var keyRightPressed:Boolean;
+var keyUpPressed:Boolean;
+var spaceBarPressed:Boolean;
+
+//Pylon variable
+var pylon: Array = new Array();
+spawnFunction();
+
+//SOUND VARIABLES
+var sound:Boolean = false;
+var AccelerationSound:GasSound = new GasSound();
+
+
+myTimer.addEventListener(TimerEvent.TIMER, timerUpdate);
+
+addEventListener(Event.ENTER_FRAME,onEnterFrameFunction);
+
+// Touch Screen Setup
+
+Multitouch.inputMode = MultitouchInputMode.TOUCH_POINT;
+
+// Key press action listeners
+btnGas.addEventListener(TouchEvent.TOUCH_BEGIN, keyPressed);
+
+btnBreak.addEventListener(TouchEvent.TOUCH_BEGIN, keyPressed);
+
+btnRight.addEventListener(TouchEvent.TOUCH_BEGIN, keyPressed);
+
+btnLeft.addEventListener(TouchEvent.TOUCH_BEGIN, keyPressed);
+
+
+
+//Key release action listeners
+
+btnGas.addEventListener(TouchEvent.TOUCH_END, keyReleased);
+
+btnBreak.addEventListener(TouchEvent.TOUCH_END, keyReleased);
+
+btnRight.addEventListener(TouchEvent.TOUCH_END, keyReleased);
+
+btnLeft.addEventListener(TouchEvent.TOUCH_END, keyReleased);
+
+//MOUSE
+
+// Key press action listeners
+btnGas.addEventListener(MouseEvent.MOUSE_DOWN, keyPressed);
+
+btnBreak.addEventListener(MouseEvent.MOUSE_DOWN, keyPressed);
+
+btnRight.addEventListener(MouseEvent.MOUSE_DOWN, keyPressed);
+
+btnLeft.addEventListener(MouseEvent.MOUSE_DOWN, keyPressed);
+
+
+//Key release action listeners
+
+btnGas.addEventListener(MouseEvent.MOUSE_UP, keyReleased);
+
+btnBreak.addEventListener(MouseEvent.MOUSE_UP, keyReleased);
+
+btnRight.addEventListener(MouseEvent.MOUSE_UP, keyReleased);
+
+btnLeft.addEventListener(MouseEvent.MOUSE_UP, keyReleased);
+
+
+//Keyboard 
+
+// Key press action listeners
+stage.addEventListener(KeyboardEvent.KEY_DOWN,keyboardPressed);
+
+//Key release action listeners
+
+stage.addEventListener(KeyboardEvent.KEY_UP,keyboardReleased);
+
+//On screen button press function
+function keyPressed(event:Event) {
+	
+	if (event.currentTarget.name == "btnGas")
+		keyUpPressed = true;
+		
+		//Turn on sound 
+		if (sound==false){
+			AccelerationSound.play(0,1);
+			trace("gas");
+		}
+	
+	if (event.currentTarget.name == "btnLeft")
+		keyLeftPressed = true;
+	if (event.currentTarget.name == "btnRight")
+		keyRightPressed = true;
+	if (event.currentTarget.name == "btnBreak")
+		spaceBarPressed = true;
+}
+
+//Keyboard press function
+function keyboardPressed(event:KeyboardEvent) {
+	
+	if (event.keyCode == Keyboard.UP)
+		keyUpPressed = true;
+		
+		//Turn on gas sound
+		if (sound==false){
+			AccelerationSound.play(0,1);
+			trace("gas");
+		}
+		sound = true;
+	
+	if (event.keyCode == Keyboard.LEFT)
+		keyLeftPressed = true;
+	if (event.keyCode == Keyboard.RIGHT)
+		keyRightPressed = true;
+	if (event.keyCode == Keyboard.SPACE)
+		spaceBarPressed = true;
+}
+
+
+//On Screen button release function
+function keyReleased(event:Event) {
+	trace("a");
+	if (event.currentTarget.name == "btnLeft")
+		keyLeftPressed = false;
+	if (event.currentTarget.name == "btnRight")
+		keyRightPressed = false;
+	if (event.currentTarget.name == "btnGas")
+		keyUpPressed = false;
+	if (event.currentTarget.name == "btnBreak")
+		spaceBarPressed = false;
+}
+
+
+//Keyboard release function
+function keyboardReleased(event:KeyboardEvent) {
+	if (event.keyCode == Keyboard.LEFT)
+		keyLeftPressed = false;
+	if (event.keyCode == Keyboard.RIGHT)
+		keyRightPressed = false;
+	if (event.keyCode == Keyboard.UP)
+		keyUpPressed = false;
+	if (event.keyCode == Keyboard.SPACE)
+		spaceBarPressed = false;
+		
+}
+
+
+//Timer function
+function timerUpdate(event:TimerEvent)
+{
+	count--;
+	
+	lblTimer.text = String(count);
+	
+	if (count == 0)
+	{
+		trace ("end");
+			removeEventListener(Event.ENTER_FRAME,onEnterFrameFunction);
+			btnGas.removeEventListener(TouchEvent.TOUCH_BEGIN, keyPressed);
+			btnBreak.removeEventListener(TouchEvent.TOUCH_BEGIN, keyReleased);
+			btnRight.removeEventListener(TouchEvent.TOUCH_BEGIN, keyPressed);
+			btnLeft.removeEventListener(TouchEvent.TOUCH_BEGIN, keyPressed);
+			btnGas.removeEventListener(TouchEvent.TOUCH_END, keyReleased);
+			btnBreak.removeEventListener(TouchEvent.TOUCH_END, keyReleased);			
+			btnRight.removeEventListener(TouchEvent.TOUCH_END, keyReleased);
+			btnLeft.removeEventListener(TouchEvent.TOUCH_END, keyReleased);
+			btnGas.removeEventListener(MouseEvent.MOUSE_DOWN, keyPressed);
+			btnRight.removeEventListener(MouseEvent.MOUSE_DOWN, keyPressed);
+			btnLeft.removeEventListener(MouseEvent.MOUSE_DOWN, keyPressed);
+			btnGas.removeEventListener(MouseEvent.MOUSE_UP, keyReleased);
+			btnRight.removeEventListener(MouseEvent.MOUSE_UP, keyReleased);
+			btnLeft.removeEventListener(MouseEvent.MOUSE_UP, keyReleased);
+			stage.removeEventListener(KeyboardEvent.KEY_DOWN,keyboardPressed);
+			stage.removeEventListener(KeyboardEvent.KEY_UP,keyboardReleased);
+			myTimer.removeEventListener(TimerEvent.TIMER, timerUpdate);
+			SoundMixer.stopAll();
+			
+			while (pylon.length>0)
+			{
+				for (var o = 0; o < pylon.length; o = o + 1)
+				{
+					removeChild(pylon[o]);
+					pylon.splice(o,1);
+					break;
+				}	
+			}
+			
+			gotoAndStop(3);
+	}
+	
+}
+
+
+function onEnterFrameFunction(event:Event) {
+	//Storing car's x and y posistion
+	var carx = carMC.x;
+	var cary = carMC.y;
+	
+	//detecting speed
+	speed = Math.round((increment)*5);
+	spedometer.text = String(speed);
+	
+	if ((carMC.rotation < 180)&&(carMC.rotation >= 0)){
+		carRotation = carMC.rotation;
+		posNeg = 1;
+	}
+	if ((carMC.rotation < 0)&&(carMC.rotation > -180)){
+		carRotation = -1 * carMC.rotation;
+		posNeg = -1;
+	}
+	
+    //if Right key pressed rotate the car clockwise and change image to carRight
+	if (keyRightPressed) {
+		carMC.rotation += .5*increment;
+		carMC.gotoAndStop(3);
+	}
+	
+	//if Left key pressed rotate the car counterclockwise and change image to carLeft
+	if (keyLeftPressed) {
+		carMC.rotation -= .5*increment;
+		carMC.gotoAndStop(2);
+	}
+	
+	//if neither Left or Right key pressed change image to carStraight
+	if (!keyLeftPressed && !keyRightPressed) {
+		carMC.gotoAndStop(1);
+	}
+	
+	//When up key is pressed...
+	if (keyUpPressed) {
+		carMC.y -= ((90-carRotation)/90)*increment;
+		
+		
+		
+		if (((carMC.rotation > 90)&&(carMC.rotation < 180))||((carMC.rotation < -90)&&(carMC.rotation > -180))) {
+				carMC.x += posNeg * (((((1-(carRotation/360))*360)-180)/90)*increment);
+		}
+		if (((carMC.rotation <= 90)&&(carMC.rotation > 0))||((carMC.rotation >= -90)&&(carMC.rotation < -1))) {			
+				carMC.x += posNeg * ((carRotation)/90)*increment;
+		}
+		if (spaceBarPressed) {
+			increment -= .5*acceleration;
+		}
+		if (!spaceBarPressed && speed < maxSpeed) {
+			increment += acceleration;
+		}
+	}
+   
+	else {
+		if (increment > 0 && spaceBarPressed) {
+			carMC.y -= ((90-carRotation)/90)*increment;
+			
+			if (((carMC.rotation > 90)&&(carMC.rotation < 180))||((carMC.rotation < -90)&&(carMC.rotation > -180))) {
+				carMC.x += posNeg * (((((1-(carRotation/360))*360)-180)/90)*increment);
+			}
+			if (((carMC.rotation <= 90)&&(carMC.rotation > 0))||((carMC.rotation >= -90)&&(carMC.rotation < -1))) {
+				carMC.x += posNeg * ((carRotation)/90)*increment;
+			}
+			increment -= 4*acceleration;
+		}
+		else if (increment > 0) {
+			carMC.y -= ((90-carRotation)/90)*increment;
+			
+			if (((carMC.rotation > 90)&&(carMC.rotation < 180))||((carMC.rotation < -90)&&(carMC.rotation > -180))) {
+				carMC.x += posNeg * (((((1-(carRotation/360))*360)-180)/90)*increment);
+			}
+			if (((carMC.rotation <= 90)&&(carMC.rotation > 0))||((carMC.rotation >= -90)&&(carMC.rotation < -1))) {
+				carMC.x += posNeg * ((carRotation)/90)*increment;
+			}
+			increment -= 1.5*acceleration;
+		}
+		else
+			increment = 0;
+	}
+	
+	// SET UP CAR BOUNDARIES 
+	 if (carMC!=null){
+		checkBoundaries(carx, cary)
+	}
+	   
+	// Set up lap timer 
+	if(carMC.hitTestObject(checkpoint1) && boolap==false)
+	{
+		if (check2==true && check3==true)
+		{
+			lap += 1;
+			lblLap.text = lap;
+			check2 = false;
+			check3 = false;
+		}
+		boolap = true;
+	}
+	else if (!carMC.hitTestObject(checkpoint1)) {
+		boolap = false;
+	}
+	//Counting checkpoints
+	if(carMC.hitTestObject(checkpoint2))
+	{
+	   if (check3==false)
+	   {
+		   check2 = true;
+	   }
+	 }
+	 if(carMC.hitTestObject(checkpoint3))
+	 {
+	   if (check2==true)
+	   {
+		   check3 = true;
+	   }
+	 }
+	
+	//Lap count maximum
+	if (lap == 4)
+	{
+			removeEventListener(Event.ENTER_FRAME,onEnterFrameFunction);
+			btnGas.removeEventListener(TouchEvent.TOUCH_BEGIN, keyPressed);
+			btnBreak.removeEventListener(TouchEvent.TOUCH_BEGIN, keyReleased);
+			btnRight.removeEventListener(TouchEvent.TOUCH_BEGIN, keyPressed);
+			btnLeft.removeEventListener(TouchEvent.TOUCH_BEGIN, keyPressed);
+			btnGas.removeEventListener(TouchEvent.TOUCH_END, keyReleased);
+			btnBreak.removeEventListener(TouchEvent.TOUCH_END, keyReleased);			
+			btnRight.removeEventListener(TouchEvent.TOUCH_END, keyReleased);
+			btnLeft.removeEventListener(TouchEvent.TOUCH_END, keyReleased);
+			btnGas.removeEventListener(MouseEvent.MOUSE_DOWN, keyPressed);
+			btnRight.removeEventListener(MouseEvent.MOUSE_DOWN, keyPressed);
+			btnLeft.removeEventListener(MouseEvent.MOUSE_DOWN, keyPressed);
+			btnGas.removeEventListener(MouseEvent.MOUSE_UP, keyReleased);
+			btnRight.removeEventListener(MouseEvent.MOUSE_UP, keyReleased);
+			btnLeft.removeEventListener(MouseEvent.MOUSE_UP, keyReleased);
+			stage.removeEventListener(KeyboardEvent.KEY_DOWN,keyboardPressed);
+			stage.removeEventListener(KeyboardEvent.KEY_UP,keyboardReleased);
+			myTimer.removeEventListener(TimerEvent.TIMER, timerUpdate);
+			SoundMixer.stopAll();
+			
+			while (pylon.length>0)
+			{
+				for (var o = 0; o < pylon.length; o = o + 1)
+				{
+					removeChild(pylon[o]);
+					pylon.splice(o,1);
+					break;
+				}	
+			}
+			
+			gotoAndStop(5);
+	}
+	
+	
+	//Hit pylon 
+	for (var i = 0; i < pylon.length; i = i + 1){
+		
+		if (carMC.hitTestObject(pylon[i]))
+		 {
+			while (pylon.length>0){
+				for (var o = 0; o < pylon.length; o = o + 1){
+					removeChild(pylon[o]);
+					pylon.splice(o,1);
+					break;
+				}	
+			}
+			trace ("hit");
+			removeEventListener(Event.ENTER_FRAME,onEnterFrameFunction);
+			btnGas.removeEventListener(TouchEvent.TOUCH_BEGIN, keyPressed);
+			btnBreak.removeEventListener(TouchEvent.TOUCH_BEGIN, keyReleased);
+			btnRight.removeEventListener(TouchEvent.TOUCH_BEGIN, keyPressed);
+			btnLeft.removeEventListener(TouchEvent.TOUCH_BEGIN, keyPressed);
+			btnGas.removeEventListener(TouchEvent.TOUCH_END, keyReleased);
+			btnBreak.removeEventListener(TouchEvent.TOUCH_END, keyReleased);			
+			btnRight.removeEventListener(TouchEvent.TOUCH_END, keyReleased);
+			btnLeft.removeEventListener(TouchEvent.TOUCH_END, keyReleased);
+			btnGas.removeEventListener(MouseEvent.MOUSE_DOWN, keyPressed);
+			btnRight.removeEventListener(MouseEvent.MOUSE_DOWN, keyPressed);
+			btnLeft.removeEventListener(MouseEvent.MOUSE_DOWN, keyPressed);
+			btnGas.removeEventListener(MouseEvent.MOUSE_UP, keyReleased);
+			btnRight.removeEventListener(MouseEvent.MOUSE_UP, keyReleased);
+			btnLeft.removeEventListener(MouseEvent.MOUSE_UP, keyReleased);
+			stage.removeEventListener(KeyboardEvent.KEY_DOWN,keyboardPressed);
+			stage.removeEventListener(KeyboardEvent.KEY_UP,keyboardReleased);
+			myTimer.removeEventListener(TimerEvent.TIMER, timerUpdate);
+			SoundMixer.stopAll();
+			gotoAndStop(3);
+			
+			
+		 }
+	}
+		 
+}
+
+
+//Spawn pylon function 
+function spawnFunction()
+{
+	for(var i:int = 0; i < 10; i++)
+	{
+		var object = new Pylon();
+		pylon.push(object);
+		addChildAt(object, 2);
+		var rndx:int = Math.floor(Math.random() * stage.stageWidth + 1);
+		var rndy:int = Math.floor(Math.random() * stage.stageHeight + 1);
+		object.x = rndx;
+		object.y = rndy;
+		
+		//Pylon boundaries
+		if (object.x > 1151.7)
+		{
+		object.x = 1151.7;
+		}
+		else if (object.x < 143.3)
+		{
+		object.x = 143.3;
+		}
+		
+		if (object.y > 707.6)
+		{
+		object.y = 707.6;
+		}
+		else if (object.y < 122.4)
+		{
+		object.y = 122.4;
+		}
+		
+	}
+}
+
+//Border detection boundaries 
+function checkBoundaries(carxpos:int, carypos:int)
+{
+	//Inside Square:
+	//X: 383.35, 889.2
+	//Y: 547.1, 317.05
+	
+	//Outside Square: 
+	//X: 1151.7, 143.3
+	//Y: 122.4, 707.6
+	//Outside
+	if (carMC.x > 1151.7){
+		carMC.x = 1151.7;
+	}
+	else if (carMC.x < 143.3){
+		carMC.x = 143.3;
+	}
+	if (carMC.y > 707.6){
+		carMC.y = 707.6;
+	}
+	else if (carMC.y < 122.4){
+		carMC.y = 122.4;
+	}
+	//Inside
+	if (carMC.x > 383.35 && carMC.x < 889.2 && carMC.y > 317.05 && carMC.y < 547.1){
+		carMC.x = carxpos;
+		carMC.y = carypos;
+	}
+
+}
+
+
+
